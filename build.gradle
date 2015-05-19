@@ -6,9 +6,11 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 version = '3.0.0-SNAPSHOT'
+mainClassName = "io.vertx.example.AppLauncher"
 
 if (!JavaVersion.current().java8Compatible) {
     throw new IllegalStateException('''A Haiku:
