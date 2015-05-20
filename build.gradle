@@ -12,6 +12,10 @@ apply plugin: 'com.github.johnrengelman.shadow'
 version = '3.0.0-SNAPSHOT'
 mainClassName = "io.vertx.example.AppLauncher"
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
 if (!JavaVersion.current().java8Compatible) {
     throw new IllegalStateException('''A Haiku:
                                       |  This needs Java 8,
