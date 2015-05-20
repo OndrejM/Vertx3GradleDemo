@@ -10,7 +10,7 @@ apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 version = '3.0.0-SNAPSHOT'
-mainClassName = "io.vertx.example.AppLauncher"
+mainClassName = "eu.inginea.vertx.AppLauncher"
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'

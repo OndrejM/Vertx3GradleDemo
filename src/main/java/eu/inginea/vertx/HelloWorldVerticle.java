@@ -1,4 +1,4 @@
-package io.vertx.example;
+package eu.inginea.vertx;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.logging.Logger;
