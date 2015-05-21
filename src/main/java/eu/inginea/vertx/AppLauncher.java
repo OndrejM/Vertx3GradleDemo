@@ -1,5 +1,7 @@
 package eu.inginea.vertx;
 
+import eu.inginea.vertx.webapp.HttpServerVerticle;
+import eu.inginea.vertx.webapp.WebAppModule;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -31,6 +33,6 @@ public class AppLauncher {
         final DeploymentOptions deploymentOptions = new DeploymentOptions();
         deploymentOptions.setRedeploy(true);
         
-        vertx.deployVerticle(HelloWorldVerticle.class.getName(), deploymentOptions);
+        vertx.deployVerticle(WebAppModule.class.getName(), deploymentOptions);
     }
 }

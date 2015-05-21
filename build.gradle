@@ -9,7 +9,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-version = '3.0.0-SNAPSHOT'
+version = '0.0.1-SNAPSHOT'
 mainClassName = "eu.inginea.vertx.AppLauncher"
 
 sourceCompatibility = '1.8'
@@ -24,6 +24,7 @@ if (!JavaVersion.current().java8Compatible) {
 }
 
 repositories {
+    maven { url file('repo').toURL() }
     mavenCentral()
     maven {
         url = 'http://oss.sonatype.org/content/repositories/snapshots/'
@@ -32,6 +33,11 @@ repositories {
 
 dependencies {
     compile 'io.vertx:vertx-core:3.0.0-SNAPSHOT'
+    
+    // should be renamed to vertx-web when available in repos
+    // needed to download artefact to local repo and fix pom - missing version for auth dependency
+    compile 'io.vertx:vertx-apex:3.0.0-SNAPSHOT' 
+        
 }
 
 shadowJar {
