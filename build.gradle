@@ -11,6 +11,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 version = '0.0.1-SNAPSHOT'
 mainClassName = "eu.inginea.vertx.AppLauncher"
+ext.mainClass = mainClassName
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
