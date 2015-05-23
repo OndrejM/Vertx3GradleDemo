@@ -9,7 +9,8 @@ public class HttpServerVerticle extends BaseVerticle {
 
     @Override
     public void start() throws Exception {
-        logger.info("Listening to HTTP requests on localhost:8080");
+        int port = context.config().getInteger("port", 8080);
+        logger.info(String.format("Listening to HTTP requests on localhost:%d", port));
         final HttpServer server = vertx.createHttpServer();
 
         Router router = Router.router(vertx);
@@ -24,6 +25,7 @@ public class HttpServerVerticle extends BaseVerticle {
             response.end("Hello World from Apex!");
         });
 
-        server.requestHandler(router::accept).listen(8080);
+        // TODO configure verticle
+        server.requestHandler(router::accept).listen(port);
     }
 }
