@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject;
  * moudle are deployed using a special loader verticle. This class helps to
  * build such loader verticles.
  */
-public class BaseVertxModule extends BaseVerticle {
+public class VertxModuleBase extends VerticleBase {
     public static boolean shouldLoadVerticle(final JsonObject verticleConfig) {
         boolean shouldLoadAsDefault = true;
         final Boolean load = verticleConfig.getBoolean("load");

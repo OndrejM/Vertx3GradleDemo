@@ -1,13 +1,13 @@
 package eu.inginea.vertx.webapp;
 
-import eu.inginea.vertx.vertxsupport.BaseVertxModule;
+import eu.inginea.vertx.vertxsupport.VertxModuleBase;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 
 /**
  * Vertx module that represents a complete web application frontend.
  */
-public class WebAppModule extends BaseVertxModule {
+public class WebAppModule extends VertxModuleBase {
 
     @Override
     public void start() throws Exception {

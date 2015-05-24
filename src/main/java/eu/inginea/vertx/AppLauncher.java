@@ -35,10 +35,15 @@ public class AppLauncher {
         });
     }
 
-    /* creates common deployment options - should be tuned for environment
-     E.g. in development, redeploy is true
-     Can be configured using JSON - best pattern is to pass JSON configuration/file as a parameter/property
-     For development, it would be also good to implement a scanner for changes in config and automatically redeply verticles if config changed
+    /**
+     * Creates common deployment options - should be tuned for environment E.g.
+     * in development, redeploy is true.
+     * <p>
+     * Can be configured using JSON - best pattern is to pass JSON
+     * configuration/file as a parameter/property.
+     * <p>
+     * For development, it would be also good to implement a scanner for changes
+     * in config and automatically redeply verticles if config changed
      */
     // TODO implement verticle redeploy mechanism when config changes on the fly
     private static DeploymentOptions newCommonDeploymentOptions() {
@@ -47,13 +52,18 @@ public class AppLauncher {
         return deploymentOptions;
     }
 
-    /* 
-     calls setConfig with custom configuration for the module
-     Best pattern is to configure using external JSON file. 
-     Path to the file can be passed as a parrameter/property, or even better, path to configuration directory can be passed, 
-     which contains configuration for all modules a file per module
-     Configuration for a module is split to configurations for single verticles, e.g. server. Each verticle receives only its configuration.
-     Configuration for every verticle contains option load - when it is false, vertice is not loaded
+    /**
+     * Calls setConfig with custom configuration for the module
+     * <p>
+     * Best pattern is to configure using external JSON file. Path to the file
+     * can be passed as a parrameter/property, or even better, path to
+     * configuration directory can be passed, which contains configuration for
+     * all modules a file per module
+     * <p>
+     * Configuration for a module is split to configurations for single
+     * verticles, e.g. server. Each verticle receives only its configuration.
+     * Configuration for every verticle contains option load - when it is false,
+     * verticle is not loaded
      */
     private static void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
         final String jsonConfig = "{'server' : {'port':8081}}".replaceAll("'", "\"");
