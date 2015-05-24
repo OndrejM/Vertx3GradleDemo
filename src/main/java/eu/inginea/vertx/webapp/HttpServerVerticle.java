@@ -15,6 +15,7 @@ public class HttpServerVerticle extends VerticleBase {
     @Override
     public void start() throws Exception {
         super.init();
+        logger.debug("reload");
         this.config = new Config(context.config());
         final HttpServerOptions serverOptions = new HttpServerOptions();
         serverOptions

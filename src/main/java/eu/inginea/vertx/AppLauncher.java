@@ -7,7 +7,10 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -37,6 +40,7 @@ public class AppLauncher extends VerticleBase {
         initLogging();
         init();
         deployVerticles(vertx);
+        logger.debug("reload..");
     }
     
     
@@ -83,14 +87,32 @@ public class AppLauncher extends VerticleBase {
      * verticle is not loaded
      */
     private void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
-        final String jsonConfig = "{'server' : {'port':8082}}".replaceAll("'", "\"");
+        final String jsonConfig = "{'server' : {'port':8081}}".replaceAll("'", "\"");
         deploymentOptions.setConfig(new JsonObject(jsonConfig));
         consumer.accept(deploymentOptions);
     }
 
     private void initLogging() {
-        final Logger rootLogger = LogManager.getLogManager().getLogger("");
-        rootLogger.setLevel(Level.FINEST);
+        final Logger rootAppLogger = Logger.getLogger(AppLauncher.class.getPackage().getName());
+        rootAppLogger.setLevel(Level.ALL);
+        getHandler(ConsoleHandler.class).ifPresent((consoleHandler) -> 
+            consoleHandler.setLevel(Level.ALL)
+        );
+        
+        
+        
+    }
+
+    private <T> Optional<T> getHandler(Class<T> cls) {
+        Logger rootLogger = Logger.getGlobal();
+        final Handler[] handlers = rootLogger.getHandlers();
+        for (Handler handler : handlers) {
+            if (cls.isInstance(handler)) {
+                T consoleHandler = cls.cast(handler);
+                return Optional.of(consoleHandler);
+            }
+        }
+        return Optional.empty();
     }
 
 }
