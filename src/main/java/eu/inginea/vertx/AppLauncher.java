@@ -1,17 +1,22 @@
 package eu.inginea.vertx;
 
+import eu.inginea.vertx.vertxsupport.VerticleBase;
 import eu.inginea.vertx.webapp.WebAppModule;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  *
  * @author media
  */
-public class AppLauncher {
+public class AppLauncher extends VerticleBase {
 
     public static void main(String[] args) {
         /* vertxOptions configure how vertx is executed - cluster, number of threads in pool, etc.
@@ -22,16 +27,28 @@ public class AppLauncher {
         // create core vertx framework instance (container)
         Vertx vertx = Vertx.vertx(vertxOptions);
 
-        // deploy verticles, usually loader verticles (modules) that load other verticles
-        deployVerticles(vertx);
+        // deploy AppLauncher as root loader verticle, which loads other loader verticles (modules) that load other verticles
+        vertx.deployVerticle(new AppLauncher(), newCommonDeploymentOptions());
 
     }
 
-    private static void deployVerticles(Vertx vertx) {
+    @Override
+    public void start() throws Exception {
+        initLogging();
+        init();
+        deployVerticles(vertx);
+    }
+    
+    
+
+    private void deployVerticles(Vertx vertx) {
 
         DeploymentOptions deploymentOptions = newCommonDeploymentOptions();
-        configureWebAppModule(deploymentOptions, (options) -> {
-            vertx.deployVerticle(WebAppModule.class.getName(), options);
+        final String webAppModuleName = WebAppModule.class.getName();
+        vertx.undeploy(webAppModuleName, (AsyncResult) -> {
+            configureWebAppModule(deploymentOptions, (options) -> {
+                vertx.deployVerticle(webAppModuleName, options);
+            });
         });
     }
 
@@ -65,10 +82,15 @@ public class AppLauncher {
      * Configuration for every verticle contains option load - when it is false,
      * verticle is not loaded
      */
-    private static void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
-        final String jsonConfig = "{'server' : {'port':8081}}".replaceAll("'", "\"");
+    private void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
+        final String jsonConfig = "{'server' : {'port':8082}}".replaceAll("'", "\"");
         deploymentOptions.setConfig(new JsonObject(jsonConfig));
         consumer.accept(deploymentOptions);
+    }
+
+    private void initLogging() {
+        final Logger rootLogger = LogManager.getLogManager().getLogger("");
+        rootLogger.setLevel(Level.FINEST);
     }
 
 }

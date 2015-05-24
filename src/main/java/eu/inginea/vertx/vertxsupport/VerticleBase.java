@@ -20,6 +20,7 @@ public abstract class VerticleBase extends AbstractVerticle {
     public void init() {
         if (logger.isDebugEnabled()) {
             logger.debug("Verticle " + getClass().getSimpleName() + " starting");
+            logger.info("Verticle " + getClass().getSimpleName() + " starting");
         }
     }
 }
