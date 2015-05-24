@@ -7,6 +7,14 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.ConsoleHandler;
@@ -22,32 +30,31 @@ import java.util.logging.Logger;
 public class AppLauncher extends VerticleBase {
 
     public static void main(String[] args) {
+        initLogging();
+
         /* vertxOptions configure how vertx is executed - cluster, number of threads in pool, etc.
          Can be configured using JSON - best pattern is to pass JSON configuration/file as a parameter/property
          */
-        final VertxOptions vertxOptions = new VertxOptions();
+        VertxOptions vertxOptions = new VertxOptions();
 
         // create core vertx framework instance (container)
         Vertx vertx = Vertx.vertx(vertxOptions);
 
-        // deploy AppLauncher as root loader verticle, which loads other loader verticles (modules) that load other verticles
-        vertx.deployVerticle(new AppLauncher(), newCommonDeploymentOptions());
+        // deploy AppLauncher as top level loader verticle, which loads other loader verticles (modules) that load other verticles
+        // NOTE: do not deploy using new AppLauncher() - redeploy does not work, see the code, where redeployer is directly null
+        vertx.deployVerticle(AppLauncher.class.getName(), topLevelDeploymentOptions());
 
     }
 
     @Override
     public void start() throws Exception {
-        initLogging();
         init();
         deployVerticles(vertx);
-        logger.debug("reload..");
     }
-    
-    
 
     private void deployVerticles(Vertx vertx) {
 
-        DeploymentOptions deploymentOptions = newCommonDeploymentOptions();
+        DeploymentOptions deploymentOptions = new DeploymentOptions();
         final String webAppModuleName = WebAppModule.class.getName();
         vertx.undeploy(webAppModuleName, (AsyncResult) -> {
             configureWebAppModule(deploymentOptions, (options) -> {
@@ -57,18 +64,20 @@ public class AppLauncher extends VerticleBase {
     }
 
     /**
-     * Creates common deployment options - should be tuned for environment E.g.
-     * in development, redeploy is true.
+     * Creates deployment options for top level deployment of initial Verticle -
+     * should be tuned for environment. E.g. in development, redeploy is true.
      * <p>
      * Can be configured using JSON - best pattern is to pass JSON
-     * configuration/file as a parameter/property.
+     * configuration/file as a parameter/property. For automatic redeploy,
+     * development config file should be on classpath.
      * <p>
-     * For development, it would be also good to implement a scanner for changes
-     * in config and automatically redeply verticles if config changed
+     * <b>Redeploy</b> is valid only for top-level deployment. All resources in
+     * classpath will be scanned for changes, included configuration files. When
+     * application is built and executed using gradle, it will scan for changes
+     * in build/classes and build/resources.
      */
-    // TODO implement verticle redeploy mechanism when config changes on the fly
-    private static DeploymentOptions newCommonDeploymentOptions() {
-        final DeploymentOptions deploymentOptions = new DeploymentOptions();
+    private static DeploymentOptions topLevelDeploymentOptions() {
+        DeploymentOptions deploymentOptions = new DeploymentOptions();
         deploymentOptions.setRedeploy(true);
         return deploymentOptions;
     }
@@ -87,25 +96,35 @@ public class AppLauncher extends VerticleBase {
      * verticle is not loaded
      */
     private void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
-        final String jsonConfig = "{'server' : {'port':8081}}".replaceAll("'", "\"");
-        deploymentOptions.setConfig(new JsonObject(jsonConfig));
+        String moduleName = "webAppModule";
+        String configPath = "config/" + moduleName + ".json";
+        URL resource = getClass().getClassLoader().getResource(configPath);
+        try {
+            byte[] fileBytes = Files.readAllBytes(Paths.get(resource.toURI()));
+            String jsonConfig = new String(fileBytes, StandardCharsets.UTF_8);
+            JsonObject config = new JsonObject(jsonConfig);
+            deploymentOptions.setConfig(config);
+        } catch (URISyntaxException | IOException ex) {
+            logger.warn("Module " + moduleName + ": config resource " + configPath + " could not be loaded, continueing with default settings.");
+        }
         consumer.accept(deploymentOptions);
     }
 
-    private void initLogging() {
-        final Logger rootAppLogger = Logger.getLogger(AppLauncher.class.getPackage().getName());
+    /* Initialize logging. This one dynamically configures JUL. 
+     Better pattern is to confgiure logging by a config file.
+     */
+    private static void initLogging() {
+        String rootPackageOfThisApp = AppLauncher.class.getPackage().getName();
+        Logger rootAppLogger = Logger.getLogger(rootPackageOfThisApp);
         rootAppLogger.setLevel(Level.ALL);
-        getHandler(ConsoleHandler.class).ifPresent((consoleHandler) -> 
-            consoleHandler.setLevel(Level.ALL)
+        getHandler(ConsoleHandler.class).ifPresent((consoleHandler)
+                -> consoleHandler.setLevel(Level.ALL)
         );
-        
-        
-        
     }
 
-    private <T> Optional<T> getHandler(Class<T> cls) {
+    private static <T> Optional<T> getHandler(Class<T> cls) {
         Logger rootLogger = Logger.getGlobal();
-        final Handler[] handlers = rootLogger.getHandlers();
+        Handler[] handlers = rootLogger.getHandlers();
         for (Handler handler : handlers) {
             if (cls.isInstance(handler)) {
                 T consoleHandler = cls.cast(handler);
