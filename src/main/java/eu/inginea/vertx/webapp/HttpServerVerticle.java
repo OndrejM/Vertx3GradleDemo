@@ -1,55 +1,71 @@
 package eu.inginea.vertx.webapp;
 
+import eu.inginea.vertx.demowebapp.DemoWebApp;
 import eu.inginea.vertx.vertxsupport.ConfigBase;
 import eu.inginea.vertx.vertxsupport.VerticleBase;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class HttpServerVerticle extends VerticleBase {
 
     private Config config;
-
+    private Collection<WebAppRegistration> webApps;
+    private WebAppHttpServer server;
+    
     @Override
     public void start() throws Exception {
         super.init();
-        logger.debug("reload");
         this.config = new Config(context.config());
-        final HttpServerOptions serverOptions = new HttpServerOptions();
-        serverOptions
-            .setPort(config.getPort())
-            .setHost(config.getHostName());
-        final HttpServer server = vertx.createHttpServer(serverOptions);
-
-        Router router = Router.router(vertx);
-
-        router.route().handler(routingContext -> {
-
-            // This handler will be called for every request
-            HttpServerResponse response = routingContext.response();
-            response.putHeader("content-type", "text/plain");
-
-            // Write to the response and end it
-            response.end("Hello World from Apex!");
-        });
-        logger.info(String.format("Listening to HTTP requests on %s:%d", serverOptions.getHost(), serverOptions.getPort()));
-        server.requestHandler(router::accept).listen();
+        server = new WebAppHttpServer(config, vertx);
+        registerWebApps();
+        server.router(buildMainRouter()).listen();
+        logger.info(String.format("Listening to HTTP requests on %s:%d", server.getHost(), server.getPort()));
     }
-    
-    private static class Config extends ConfigBase {
+
+    private void registerWebApps() {
+        webApps = new ArrayList<>();
+        webApps.add(new WebAppRegistration()
+                .webApp(new DemoWebApp(vertx))
+                .path("/demo"));
+    }
+
+    private Router buildMainRouter() {
+        Router mainRouter = Router.router(vertx);
+        for (WebAppRegistration webAppReg : webApps) {
+            mainRouter.mountSubRouter(webAppReg.path, webAppReg.webApp.getRouter());
+        }
+        return mainRouter;
+    }
+
+    static class Config extends ConfigBase {
 
         public Config(JsonObject config) {
             super(config);
         }
-        
+
         int getPort() {
             return config.getInteger("port", 8080);
         }
-        
+
         String getHostName() {
             return config.getString("hostname", "0.0.0.0");
+        }
+    }
+    
+    static private class WebAppRegistration {
+        String path;
+        WebApp webApp;
+
+        private WebAppRegistration webApp(DemoWebApp webApp) {
+            this.webApp = webApp;
+            return this;
+        }
+
+        private WebAppRegistration path(String path) {
+            this.path = path;
+            return this;
         }
     }
 }
