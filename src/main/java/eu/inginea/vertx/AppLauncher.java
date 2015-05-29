@@ -2,16 +2,13 @@ package eu.inginea.vertx;
 
 import eu.inginea.vertx.vertxsupport.VerticleBase;
 import eu.inginea.vertx.webapp.WebAppModule;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,7 +17,6 @@ import java.util.function.Consumer;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -42,8 +38,11 @@ public class AppLauncher extends VerticleBase {
 
         // deploy AppLauncher as top level loader verticle, which loads other loader verticles (modules) that load other verticles
         // NOTE: do not deploy using new AppLauncher() - redeploy does not work, see the code, where redeployer is directly null
-        vertx.deployVerticle(AppLauncher.class.getName(), topLevelDeploymentOptions());
+        vertx.deployVerticle(verticleName(), topLevelDeploymentOptions());
+    }
 
+    private static String verticleName() {
+        return AppLauncher.class.getName();
     }
 
     @Override
@@ -77,9 +76,13 @@ public class AppLauncher extends VerticleBase {
      * in build/classes and build/resources.
      */
     private static DeploymentOptions topLevelDeploymentOptions() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions();
-        deploymentOptions.setRedeploy(true);
-        return deploymentOptions;
+        return new DeploymentOptions()
+                    .setRedeploy(true);
+    }
+
+    private void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
+        String moduleName = "webAppModule";
+        configureModule(moduleName, deploymentOptions, consumer);
     }
 
     /**
@@ -95,11 +98,11 @@ public class AppLauncher extends VerticleBase {
      * Configuration for every verticle contains option load - when it is false,
      * verticle is not loaded
      */
-    private void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
-        String moduleName = "webAppModule";
+    private void configureModule(String moduleName, DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
         String configPath = "config/" + moduleName + ".json";
         URL resource = getClass().getClassLoader().getResource(configPath);
         try {
+            warnPotentiallyBlocking("Reading config file in blocking way, should be refactored to a worker verticle to unblock loading other modules");
             byte[] fileBytes = Files.readAllBytes(Paths.get(resource.toURI()));
             String jsonConfig = new String(fileBytes, StandardCharsets.UTF_8);
             JsonObject config = new JsonObject(jsonConfig);

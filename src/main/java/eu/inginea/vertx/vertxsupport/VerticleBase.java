@@ -17,10 +17,20 @@ public abstract class VerticleBase extends AbstractVerticle {
      * is necessary to be able to choose which start method of the Verticle
      * interface to implement.
      */
-    public void init() {
+    protected void init() {
         if (logger.isDebugEnabled()) {
             logger.debug("Verticle " + getClass().getSimpleName() + " starting");
-            logger.info("Verticle " + getClass().getSimpleName() + " starting");
+        }
+    }
+    
+    /**
+     * Warning if a blocking operation is going to be executed in event loop context.
+     * It might be worth to refactor it into worker context, but in meantime blocking solution us  sufficient.
+     * @param msg
+     */
+    protected void warnPotentiallyBlocking(String msg) {
+        if (context.isEventLoopContext()) {
+            logger.warn("POTENTIALLY BLOCKING: " + msg);
         }
     }
 }

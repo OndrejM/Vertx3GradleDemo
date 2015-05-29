@@ -25,7 +25,7 @@ if (!JavaVersion.current().java8Compatible) {
 }
 
 repositories {
-    maven { url file('repo').toURL() }
+    //maven { url file('repo').toURL() }
     mavenCentral()
     maven {
         url = 'http://oss.sonatype.org/content/repositories/snapshots/'
@@ -37,7 +37,7 @@ dependencies {
     
     // should be renamed to vertx-web when available in repos
     // needed to download artefact to local repo and fix pom - missing version for auth dependency
-    compile 'io.vertx:vertx-apex:3.0.0-SNAPSHOT' 
+    compile 'io.vertx:vertx-web:3.0.0-SNAPSHOT' 
         
 }
 
