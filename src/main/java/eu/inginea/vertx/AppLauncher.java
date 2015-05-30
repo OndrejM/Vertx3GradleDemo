@@ -114,7 +114,9 @@ public class AppLauncher extends VerticleBase {
     }
 
     /* Initialize logging. This one dynamically configures JUL. 
-     Better pattern is to confgiure logging by a config file.
+    Better pattern is to confgiure logging by a config file 
+    so that no direct dependency on underlzing logging API is introduced.
+    This is a temporary solution.
      */
     private static void initLogging() {
         String rootPackageOfThisApp = AppLauncher.class.getPackage().getName();
