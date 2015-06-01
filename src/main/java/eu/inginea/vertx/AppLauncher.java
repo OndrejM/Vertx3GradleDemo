@@ -77,7 +77,7 @@ public class AppLauncher extends VerticleBase {
      */
     private static DeploymentOptions topLevelDeploymentOptions() {
         return new DeploymentOptions()
-                    .setRedeploy(true);
+                .setRedeploy(true);
     }
 
     private void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
@@ -101,22 +101,26 @@ public class AppLauncher extends VerticleBase {
     private void configureModule(String moduleName, DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {
         String configPath = "config/" + moduleName + ".json";
         URL resource = getClass().getClassLoader().getResource(configPath);
-        try {
-            warnPotentiallyBlocking("Reading config file in blocking way, should be refactored to a worker verticle to unblock loading other modules");
-            byte[] fileBytes = Files.readAllBytes(Paths.get(resource.toURI()));
-            String jsonConfig = new String(fileBytes, StandardCharsets.UTF_8);
-            JsonObject config = new JsonObject(jsonConfig);
-            deploymentOptions.setConfig(config);
-        } catch (URISyntaxException | IOException ex) {
-            logger.warn("Module " + moduleName + ": config resource " + configPath + " could not be loaded, continueing with default settings.");
+        if (resource != null) {
+            try {
+                warnPotentiallyBlocking("Reading config file in blocking way, should be refactored to a worker verticle to unblock loading other modules");
+                byte[] fileBytes = Files.readAllBytes(Paths.get(resource.toURI()));
+                String jsonConfig = new String(fileBytes, StandardCharsets.UTF_8);
+                JsonObject config = new JsonObject(jsonConfig);
+                deploymentOptions.setConfig(config);
+            } catch (URISyntaxException | IOException ex) {
+                logger.warn("Module " + moduleName + ": config resource " + configPath + " could not be loaded, continuing with default settings.");
+            }
+        } else {
+            logger.warn("Module " + moduleName + ": config resource " + configPath + " does not exist, continuing with default settings.");
         }
         consumer.accept(deploymentOptions);
     }
 
     /* Initialize logging. This one dynamically configures JUL. 
-    Better pattern is to confgiure logging by a config file 
-    so that no direct dependency on underlzing logging API is introduced.
-    This is a temporary solution.
+     Better pattern is to confgiure logging by a config file 
+     so that no direct dependency on underlzing logging API is introduced.
+     This is a temporary solution.
      */
     private static void initLogging() {
         String rootPackageOfThisApp = AppLauncher.class.getPackage().getName();
