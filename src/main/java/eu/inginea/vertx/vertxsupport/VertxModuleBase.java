@@ -1,5 +1,6 @@
 package eu.inginea.vertx.vertxsupport;
 
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -14,6 +15,23 @@ public class VertxModuleBase extends VerticleBase {
         boolean shouldLoadAsDefault = true;
         final Boolean load = verticleConfig.getBoolean("load");
         return load != null ? load : shouldLoadAsDefault;
+    }
+
+    /**
+     * Load a child verticle using verticle configuration stored under configName.
+     * Copies global configuration from this verticle onto the configuration of child verticle.
+     * 
+     * @param configName Name of sub-configuration to be used with child verticle
+     * @param verticleName Name of veticle to load
+     */
+    protected void loadVerticle(final String configName, final String verticleName) {
+        JsonObject serverConfig = context.config().getJsonObject(configName);
+        JsonObject globalConfig = context.config().getJsonObject(ConfigBase.GLOBAL_CONFIG_NAME);
+        if (shouldLoadVerticle(serverConfig)) {
+            serverConfig.put(ConfigBase.GLOBAL_CONFIG_NAME, globalConfig);
+            final DeploymentOptions serverOptions = new DeploymentOptions().setConfig(serverConfig);
+            vertx.deployVerticle(verticleName, serverOptions);
+        }
     }
 
 }

@@ -21,12 +21,4 @@ public class WebAppModule extends VertxModuleBase {
         loadVerticle(configName, verticleName);
     }
 
-    private void loadVerticle(final String configName, final String verticleName) {
-        final JsonObject serverConfig = context.config().getJsonObject(configName);
-        if (shouldLoadVerticle(serverConfig)) {
-            final DeploymentOptions serverOptions = new DeploymentOptions().setConfig(serverConfig);
-            vertx.deployVerticle(verticleName, serverOptions);
-        }
-    }
-
 }

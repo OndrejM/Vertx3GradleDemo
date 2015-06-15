@@ -24,3 +24,4 @@ mods
 /.nb-gradle/
 /.nb-gradle-properties
 /diy/.nb-gradle/
+.vertx

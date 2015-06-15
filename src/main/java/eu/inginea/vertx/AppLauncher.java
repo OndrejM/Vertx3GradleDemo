@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 public class AppLauncher extends VerticleBase {
 
     public static void main(String[] args) {
+        System.setProperty("vertx.disableFileCaching", "true");
         initLogging();
 
         /* vertxOptions configure how vertx is executed - cluster, number of threads in pool, etc.
@@ -136,8 +137,8 @@ public class AppLauncher extends VerticleBase {
         Handler[] handlers = rootLogger.getHandlers();
         for (Handler handler : handlers) {
             if (cls.isInstance(handler)) {
-                T consoleHandler = cls.cast(handler);
-                return Optional.of(consoleHandler);
+                T clsHandler = cls.cast(handler);
+                return Optional.of(clsHandler);
             }
         }
         return Optional.empty();

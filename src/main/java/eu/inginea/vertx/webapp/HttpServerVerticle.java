@@ -27,7 +27,7 @@ public class HttpServerVerticle extends VerticleBase {
     private void registerWebApps() {
         webApps = new ArrayList<>();
         webApps.add(new WebAppRegistration()
-                .webApp(new DemoWebApp(vertx))
+                .webApp(new DemoWebApp(config.getDemoWebAppConfig(), vertx))
                 .path("/demo"));
     }
 
@@ -51,6 +51,10 @@ public class HttpServerVerticle extends VerticleBase {
 
         String getHostName() {
             return config.getString("hostname", "0.0.0.0");
+        }
+
+        private DemoWebApp.Config getDemoWebAppConfig() {
+            return new DemoWebApp.Config(getSubConfig("demoWebApp"));
         }
     }
     
