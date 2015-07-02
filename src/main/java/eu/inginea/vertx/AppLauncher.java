@@ -55,7 +55,7 @@ public class AppLauncher extends VerticleBase {
 
         DeploymentOptions deploymentOptions = new DeploymentOptions();
         final String webAppModuleName = WebAppModule.class.getName();
-        vertx.undeployVerticle(webAppModuleName, (AsyncResult) -> {
+        vertx.undeploy(webAppModuleName, (AsyncResult) -> {
             configureWebAppModule(deploymentOptions, (options) -> {
                 vertx.deployVerticle(webAppModuleName, options);
             });
@@ -76,8 +76,8 @@ public class AppLauncher extends VerticleBase {
      * in build/classes and build/resources.
      */
     private static DeploymentOptions topLevelDeploymentOptions() {
-        return new DeploymentOptions()
-                .setRedeploy(true);
+        return new DeploymentOptions();
+                //.setRedeploy(true);
     }
 
     private void configureWebAppModule(DeploymentOptions deploymentOptions, Consumer<DeploymentOptions> consumer) {

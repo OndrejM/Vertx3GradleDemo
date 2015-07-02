@@ -12,7 +12,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 version = '0.0.1-SNAPSHOT'
 mainClassName = "eu.inginea.vertx.AppLauncher"
 ext.mainClass = mainClassName
-def vertxCoreVersion = "3.0.0-dev_preview1"
+def vertxCoreVersion = "3.0.0"
 def vertxWebVersion = "3.0.0"
 
 sourceCompatibility = '1.8'
