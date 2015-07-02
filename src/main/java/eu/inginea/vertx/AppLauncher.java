@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 public class AppLauncher extends VerticleBase {
 
     public static void main(String[] args) {
-        System.setProperty("vertx.disableFileCaching", "true");
         initLogging();
 
         /* vertxOptions configure how vertx is executed - cluster, number of threads in pool, etc.
@@ -56,7 +55,7 @@ public class AppLauncher extends VerticleBase {
 
         DeploymentOptions deploymentOptions = new DeploymentOptions();
         final String webAppModuleName = WebAppModule.class.getName();
-        vertx.undeploy(webAppModuleName, (AsyncResult) -> {
+        vertx.undeployVerticle(webAppModuleName, (AsyncResult) -> {
             configureWebAppModule(deploymentOptions, (options) -> {
                 vertx.deployVerticle(webAppModuleName, options);
             });

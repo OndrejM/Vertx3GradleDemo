@@ -14,12 +14,12 @@ public class LoggerFactory {
 
     
     public static Logger getLogger(final Class<?> clazz) {
-        final io.vertx.core.logging.Logger vertxLogger = io.vertx.core.logging.LoggerFactory.getLogger(clazz);
+        final io.vertx.core.logging.Logger vertxLogger = io.vertx.core.logging.impl.LoggerFactory.getLogger(clazz);
         return getLoggerWrapper(vertxLogger);
     }
 
     public static Logger getLogger(final String name) {
-        final io.vertx.core.logging.Logger vertxLogger = io.vertx.core.logging.LoggerFactory.getLogger(name);
+        final io.vertx.core.logging.Logger vertxLogger = io.vertx.core.logging.impl.LoggerFactory.getLogger(name);
         return getLoggerWrapper(vertxLogger);
     }
 
