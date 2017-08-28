@@ -89,7 +89,7 @@ public class AppLauncher extends VerticleBase {
      * Calls setConfig with custom configuration for the module
      * <p>
      * Best pattern is to configure using external JSON file. Path to the file
-     * can be passed as a parrameter/property, or even better, path to
+     * can be passed as a parameter/property, or even better, path to
      * configuration directory can be passed, which contains configuration for
      * all modules a file per module
      * <p>
@@ -118,8 +118,8 @@ public class AppLauncher extends VerticleBase {
     }
 
     /* Initialize logging. This one dynamically configures JUL. 
-     Better pattern is to confgiure logging by a config file 
-     so that no direct dependency on underlzing logging API is introduced.
+     Better pattern is to configure logging by a config file 
+     so that no direct dependency on underlying logging API is introduced.
      This is a temporary solution.
      */
     private static void initLogging() {
